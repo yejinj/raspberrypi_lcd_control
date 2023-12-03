@@ -114,9 +114,10 @@ int main(int argc, char *argv[])
     // 출력 전 lcd 초기화
     lcd_init();
     print_str("ready..");
-    delay_f();
-    delay_f();
-    delay_f();
+
+    for (int i = 0; i < 3; i++) {
+        delay_f();
+    }
 
     lcd_init();
     get_set();
@@ -153,9 +154,10 @@ int main(int argc, char *argv[])
 
             lcd_init();
             print_str("Police win!");
-            delay_f();
-            delay_f();
-            delay_f();
+
+            for (int i = 0; i < 3; i++) {
+                delay_f();
+            }
 
             detected = 1;
             exit(0);
