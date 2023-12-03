@@ -9,6 +9,10 @@
 #include <wiringPiI2C.h>
 #include <memory.h>
 #include <string.h>
+#include <string.h>
+#include <time.h>
+
+#define BUFFER_SIZE 20
 
 // prepare for socket communication
 #define PIR 4       // BCM_GPIO 23
@@ -37,7 +41,7 @@ void cursor_to_home(void);
 void print_str(const char *s);
 void get_set(void);
 void time_limit(void);
-// void delay_f(void);
+void delay_f(void);
 
 int main(int argc, char *argv[])
 {
@@ -110,9 +114,9 @@ int main(int argc, char *argv[])
     // 출력 전 lcd 초기화
     lcd_init();
     print_str("ready..");
-    delay(10);
-    // delayMicroseconds(500);
-    // delay(1000);
+    delay_f();
+    delay_f();
+    delay_f();
 
     lcd_init();
     get_set();
@@ -130,8 +134,8 @@ int main(int argc, char *argv[])
         print_str("s ");
 
         // Check for touch sensor detection        
-        if (!digitalRead(PIR)) {            
-            delay(1000);
+        if (!digitalRead(PIR)) {       
+            delay_f();
             --time_limit;
         }
 
@@ -149,7 +153,9 @@ int main(int argc, char *argv[])
 
             lcd_init();
             print_str("Police win!");
-            delay(1000);
+            delay_f();
+            delay_f();
+            delay_f();
 
             detected = 1;
             exit(0);
@@ -162,7 +168,9 @@ int main(int argc, char *argv[])
 
         lcd_init();
         print_str("Theif win!");
-        delay(1000);
+        delay_f();
+        delay_f();
+        delay_f();
     }
 
     return 0;
@@ -198,7 +206,7 @@ void get_set(void) {
     for (i = 3; i > 0; --i) {
         lcd_m(LINE2);
         print_int(i);
-        delay(1000);
+        delay_f();
     }
 }
 
@@ -213,7 +221,7 @@ void time_limit(void) {
         print_int(seconds % 60);
         print_str("s ");
 
-        delay(1000);
+        delay_f();
         --seconds;
     }
 
@@ -222,7 +230,10 @@ void time_limit(void) {
         cursor_to_home();
 
         print_str("Game Over!");
-        delay(5000);
+
+        for (int i = 0; i < 5; i++) {
+            delay_f();
+        }
     }
 }
 
@@ -277,8 +288,29 @@ void lcd_init() {
     delayMicroseconds(500);
 }
 
+void delay_f() {
+    char buffer[BUFFER_SIZE];
+    time_t temp = 0;
 
-// void delay_f(void)
-// {
-//     return 0;
-// }
+    while (1) {
+        // 현재 시간 얻기
+        time_t current_time;
+        time(&current_time);
+
+        // 초 단위로 버퍼와 현재 시간 비교
+        if (temp != current_time) {
+            temp = current_time;
+
+            // 초 단위의 값을 문자열로 변환하여 버퍼에 저장
+            snprintf(buffer, sizeof(buffer), "%ld", temp);
+
+            // 현재 시간과 버퍼의 초 단위 값이 같을 때까지 1초씩 대기
+            while (temp == current_time) {
+                time(&current_time);
+            }
+
+            // 1초가 지난 후에 루프를 빠져나감
+            break;
+        }
+    }
+}
